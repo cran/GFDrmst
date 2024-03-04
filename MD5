@@ -1,0 +1,12 @@
+6e3c531fa8f540aca9c8361eb8c6850e *DESCRIPTION
+5c8156793018602440bdeda9e5108cf8 *NAMESPACE
+a6798a8d4aac92f2ebfa9a1e73b9e313 *R/GFDrmstGUI.R
+7841e0b2b90db4f9ce7614dc6c819387 *R/Hilfsfunktionen.R
+a461fb9ce6163beac9530b0f463f4462 *R/plot_function.R
+1adcf7f1e77624f2fedb098b6eb009d0 *R/summary.GFDrmst.R
+a29c8e7f45571775b214882306d0ada9 *R/test_functions.R
+afbe4209b3bb961ba3e41cbfe79ea507 *build/partial.rdb
+3a9f22742614dcbf8016caab18a1c146 *man/GFDrmstGUI.Rd
+1730ca1f085699351e7a4f876c8fa944 *man/RMST.test.Rd
+e17b727afe1fedab5da3fd44a2bb8be8 *man/plot.GFDrmst.Rd
+5958ba462046f507ab227ffede564821 *man/summary.GFDrmst.Rd
