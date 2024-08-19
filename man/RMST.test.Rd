@@ -46,7 +46,9 @@ right hand side contains the factor variables of interest. Default option is \co
   A data.frame or list containing the variables in formula and the censoring status indicator. Default option is \code{NULL}. Either \code{time, status, group} or \code{formula, event, data} needs to be specified.
 }
 \item{hyp_mat}{
-  A list containing all the hypothesis matrices H for the multiple tests or one of the options \code{"Tukey", "Dunnett"} and \code{"center"} for Tukey's or Dunnett's contrasts or the centering matrix, respectively, or a matrix if only one hypothesis is of interest. For the permutation test, all matrices need to be contrast matrices.
+  A list containing all the hypothesis matrices H for the multiple tests or one of the options \code{"Tukey", "Dunnett", "center", "crossed factorial"} or a matrix if only one hypothesis is of interest.
+The option \code{"crossed factorial"} is only available if \code{formula} is specified.
+For the permutation test, all matrices need to be contrast matrices.
 }
 \item{hyp_vec}{
   A list containing all the hypothesis vectors c for the multiple tests or a vector if only one hypothesis is of interest. By default (\code{NULL}), all hypothesis vectors are set to zero vectors of suitable length.
@@ -82,6 +84,10 @@ We are considering the multiple testing problem with null and alternative hypoth
 \deqn{
 \mathcal{H}_{0,\ell}: \mathbf{H}_{\ell} \boldsymbol\mu = \mathbf{c}_{\ell} \quad \mathrm{vs.} \quad \mathcal{H}_{1,\ell}: \mathbf{H}_{\ell} \boldsymbol\mu \neq \mathbf{c}_{\ell}, \qquad \mathrm{for }\: \ell\in\{1,...,L\}.
 }
+
+For the permutation test, all matrices \eqn{\mathbf{H}_{1},...,\mathbf{H}_{L}} specified in \code{hyp_mat} need to be contrast matrices.
+The following options are already implemented for \code{hyp_mat}. \code{"Tukey", "Dunnett"} or \code{"center"} lead to Tukey's or Dunnett's contrasts or the centering matrix, respectively.
+If \code{formula} is specified, the option \code{"crossed factorial"} is also available to test simultaneously on main/interaction effects of a crossed factorial design; cf. Example 1 in Munko et al. (2024) for the crossed two-way design.
 
 If \code{stepwise = TRUE}, the closed testing procedure is applied. In this case, no confidence intervals can be computed for the linear combinations but it may be that more tests can reject.
 
@@ -119,6 +125,16 @@ out <- RMST.test(time = colonCS$Stime,
                  method = "asymptotic")
 summary(out)
 plot(out)
+
+## an example for a crossed two-way design
+out_tw <- RMST.test(formula = "Stime ~ rx * sex",
+                    event = "event",
+                    data = colonCS,
+                    hyp_mat = "Tukey",
+                    tau = 3000,
+                    method = "asymptotic")
+summary(out_tw)
+plot(out_tw)
 
 \donttest{
 # multiple groupwise bootstrap tests

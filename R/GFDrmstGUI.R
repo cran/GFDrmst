@@ -43,7 +43,7 @@ GFDrmstGUI <- function(){
                                     - 2 Factors:\n <br> time ~ factorA * factorB \n <br> or\n <br> time ~ factorA + factorB  ",
                                                                            placement = "right")),
                                              shinyjs::hidden(h5(id = "titleWeights", strong("Further Arguments"), style = "color:grey")),
-                                             splitLayout(cellWidths = c("30%"), shinyjs::hidden(selectInput("hyp_mat", "Select contrast matrix:", c(`Dunnett` = "Dunnett", `Tukey` = "Tukey", `Center` = "center", `Other` = "Other"), selected = "Tukey"))),
+                                             splitLayout(cellWidths = c("30%"), shinyjs::hidden(selectInput("hyp_mat", "Select contrast matrix:", c(`Dunnett` = "Dunnett", `Tukey` = "Tukey", `Center` = "center", `crossed factorial` = "crossed factorial", `Other` = "Other"), selected = "Tukey"))),
                                              # Other
                                              splitLayout(cellWidths = c("70%","30%"), uiOutput(outputId = "out_mat"), uiOutput(outputId = "out_vec")),
                                              conditionalPanel(condition = "input.hyp_mat == 'Other'",
@@ -136,6 +136,22 @@ GFDrmstGUI <- function(){
                                                  "~", paste(colnames(datasetInput())[colnames(datasetInput()) != input$dynamic][-1], collapse = " * ", sep = " ")) ))
       }
     })
+    # Define a reactive value to track the formula
+    formula_reactive <- reactive({
+      req(input$dynamic3)  # Ensure the formula input is available
+
+      # Safely return the formula if it's valid
+      if (nchar(input$dynamic3) > 0) {
+        tryCatch({
+          as.formula(input$dynamic3)  # Convert to formula
+        }, error = function(e) {
+          NULL  # Return NULL if invalid formula
+        })
+      } else {
+        NULL
+      }
+    })
+
     observe({
       values2$dyn <- input$dynamic2
       values2$dyn3 <- input$dynamic3
@@ -280,7 +296,7 @@ GFDrmstGUI <- function(){
                       }
                       if (input$Method == "groupwise") {
                         output_grp <- RMST.groupwise.test(formula = isolate(input$dynamic3),
-                                                          event = input$dynamic,
+                                                          event = input$dynamic, Nres = input$nres,
                                                           data = isolate(data), hyp_mat = my_hyp_mat, hyp_vec = my_hyp_vec,
                                                           tau = input$tau, stepwise = input$stepwise, alpha = input$alpha)
 
@@ -296,7 +312,7 @@ GFDrmstGUI <- function(){
                       }
                       if (input$Method == "permutation") {
                         output_perm <- RMST.permutation.test(formula = isolate(input$dynamic3),
-                                                             event = input$dynamic,
+                                                             event = input$dynamic, Nres = input$nres,
                                                              data = isolate(data), hyp_mat = my_hyp_mat, hyp_vec = my_hyp_vec,
                                                              tau = input$tau, stepwise = input$stepwise, alpha = input$alpha)
 

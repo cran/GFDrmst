@@ -1,7 +1,7 @@
 Package: GFDrmst
 Type: Package
 Title: Multiple RMST-Based Tests in General Factorial Designs
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
   c(
   person(given = "Marc",
@@ -26,10 +26,10 @@ Imports: GFDmcv, lpSolve, shinyWidgets, shinyMatrix, shiny (>= 1.5.0),
         tippy (>= 0.1.0), mvtnorm, MASS (>= 7.3-53), plyr (>= 1.8.6),
         shinyjs (>= 2.0.0), shinythemes (>= 1.1.2)
 NeedsCompilation: no
-Packaged: 2024-03-01 15:02:32 UTC; munko
+Packaged: 2024-08-19 14:07:26 UTC; munko
 Author: Marc Ditzhaus [aut],
   Dennis Dobler [aut],
   Marc Kindop [aut],
   Merle Munko [aut, cre]
 Repository: CRAN
-Date/Publication: 2024-03-04 10:40:08 UTC
+Date/Publication: 2024-08-19 15:00:07 UTC

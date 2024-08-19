@@ -41,16 +41,50 @@ RMST.asymptotic.test <- function(time = NULL, status = NULL, group = NULL,
   group <- factor(group, labels = 1:k)
   # some possible values for hyp_mat
   if(is.character(hyp_mat)){
-    Y <- GFDmcv::contr_mat(k, type = hyp_mat)
-    X <- data.frame(t(Y))
-    colnames(X) <- rownames(Y)
-    hyp_mat <- as.list(X)
-    hyp_mat <- lapply(hyp_mat, t)
-  }else{
-    if(is.null(hyp_vec)){
+    if(hyp_mat %in% c("center", "Dunnett", "Tukey")){
+      Y <- GFDmcv::contr_mat(k, type = hyp_mat)
+      X <- data.frame(t(Y))
+      colnames(X) <- rownames(Y)
+      hyp_mat <- as.list(X)
+      hyp_mat <- lapply(hyp_mat, t)
+    }else{
+      if(hyp_mat== "crossed factorial"){
+        if(is.null(formula)) stop("Formula needed to realize the crossed factorial design.")
+        formula2 <- paste0(formula, "*", event)
+        dat <- model.frame(formula2, data)
+        nadat <- names(dat)
+        nf <- ncol(dat) - 2
+        fl <- NA
+        for (aa in 1:nf) {
+          fl[aa] <- nlevels(as.factor(dat[, aa + 1]))
+        }
+        levels <- list()
+        for (jj in 1:nf) {
+          levels[[jj]] <- levels(as.factor(dat[, jj + 1]))
+        }
+        lev_names <- expand.grid(levels)
+        if (nf == 1) {
+          hyp_mat <- list(diag(fl) - matrix(1/fl, ncol = fl,
+                                            nrow = fl))
+        }else {
+          lev_names <- lev_names[do.call(order, lev_names[, 1:nf]),]
+          formula3 <- as.formula(formula)
+          nr_hypo <- attr(terms(formula3), "factors")
+          fac_names_original <- colnames(nr_hypo)
+          formula1 <- as.formula( gsub("\\+", "*", formula))
+          nr_hypo <- attr(terms(formula1), "factors")
+          fac_names <- colnames(nr_hypo)
+          perm_names <- t(attr(terms(formula1), "factors")[-1, ])
+
+          hyp_mat <- HC(fl, perm_names, fac_names)[[1]]
+          names(hyp_mat) <- HC(fl, perm_names, fac_names)[[2]]
+          hyp_mat <- hyp_mat[fac_names_original]
+
+        }
+      }else{ stop("hyp_mat is an invalid character input") }
+    }}else{if(is.null(hyp_vec)){
       warning("hyp_vec is chosen as zero vector since it is unspecified!")
-    }
-  }
+    }}
   if(is.null(hyp_vec)){
     hyp_vec <- lapply(hyp_mat, function(x) rep(0, nrow(x)))
     #warning("hyp_vec is chosen as zero vector since it is unspecified!")
@@ -120,6 +154,7 @@ RMST.asymptotic.test <- function(time = NULL, status = NULL, group = NULL,
     #out <- list()
     res <- matrix(list() , nrow = L, ncol = 8)
     colnames(res) <- c("hyp_matrix", "estimator", "lwr_conf", "upr_conf", "test_stat", "critical value", "adj_pvalue", "decision")
+    rownames(res) <- names(hyp_mat)
 
     for(l in 1:L){
       if(sum(my_index) > 0){
@@ -188,6 +223,7 @@ RMST.asymptotic.test <- function(time = NULL, status = NULL, group = NULL,
 
     res <- matrix(list() , nrow = L, ncol = 6)
     colnames(res) <- c("hyp_matrix", "estimator", "test_stat", "critical value", "adj_pvalue", "decision")
+    rownames(res) <- names(hyp_mat)
     cv <- crit_values2(random_values, alpha = alpha)
 
     for(l in 1:L){
@@ -255,16 +291,50 @@ RMST.groupwise.test <- function(time = NULL, status = NULL, group = NULL,
   group <- factor(group, labels = 1:k)
   # some possible values for hyp_mat
   if(is.character(hyp_mat)){
-    Y <- GFDmcv::contr_mat(k, type = hyp_mat)
-    X <- data.frame(t(Y))
-    colnames(X) <- rownames(Y)
-    hyp_mat <- as.list(X)
-    hyp_mat <- lapply(hyp_mat, t)
-  }else{
-    if(is.null(hyp_vec)){
+    if(hyp_mat %in% c("center", "Dunnett", "Tukey")){
+      Y <- GFDmcv::contr_mat(k, type = hyp_mat)
+      X <- data.frame(t(Y))
+      colnames(X) <- rownames(Y)
+      hyp_mat <- as.list(X)
+      hyp_mat <- lapply(hyp_mat, t)
+    }else{
+      if(hyp_mat== "crossed factorial"){
+        if(is.null(formula)) stop("Formula needed to realize the crossed factorial design.")
+        formula2 <- paste0(formula, "*", event)
+        dat <- model.frame(formula2, data)
+        nadat <- names(dat)
+        nf <- ncol(dat) - 2
+        fl <- NA
+        for (aa in 1:nf) {
+          fl[aa] <- nlevels(as.factor(dat[, aa + 1]))
+        }
+        levels <- list()
+        for (jj in 1:nf) {
+          levels[[jj]] <- levels(as.factor(dat[, jj + 1]))
+        }
+        lev_names <- expand.grid(levels)
+        if (nf == 1) {
+          hyp_mat <- list(diag(fl) - matrix(1/fl, ncol = fl,
+                                            nrow = fl))
+        }else {
+          lev_names <- lev_names[do.call(order, lev_names[, 1:nf]),]
+          formula3 <- as.formula(formula)
+          nr_hypo <- attr(terms(formula3), "factors")
+          fac_names_original <- colnames(nr_hypo)
+          formula1 <- as.formula( gsub("\\+", "*", formula))
+          nr_hypo <- attr(terms(formula1), "factors")
+          fac_names <- colnames(nr_hypo)
+          perm_names <- t(attr(terms(formula1), "factors")[-1, ])
+
+          hyp_mat <- HC(fl, perm_names, fac_names)[[1]]
+          names(hyp_mat) <- HC(fl, perm_names, fac_names)[[2]]
+          hyp_mat <- hyp_mat[fac_names_original]
+
+        }
+      }else{ stop("hyp_mat is an invalid character input") }
+    }}else{if(is.null(hyp_vec)){
       warning("hyp_vec is chosen as zero vector since it is unspecified!")
-    }
-  }
+    }}
   if(is.null(hyp_vec)){
     hyp_vec <- lapply(hyp_mat, function(x) rep(0, nrow(x)))
     #warning("hyp_vec is chosen as zero vector since it is unspecified!")
@@ -350,6 +420,7 @@ RMST.groupwise.test <- function(time = NULL, status = NULL, group = NULL,
   # if all matrices are vectors
   if(all(sapply(hyp_mat, function(x) nrow(x)) == 1)){
     res <- matrix(list() , nrow = L, ncol = 8)
+    rownames(res) <- names(hyp_mat)
     colnames(res) <- c("hyp_matrix", "estimator", "lwr_conf", "upr_conf", "test_stat", "critical value", "adj_pvalue", "decision")
 
     quant <- crit_values2(erg, alpha = alpha)
@@ -398,6 +469,7 @@ RMST.groupwise.test <- function(time = NULL, status = NULL, group = NULL,
   }else{
     res <- matrix(list() , nrow = L, ncol = 6)
     colnames(res) <- c("hyp_matrix", "estimator", "test_stat", "critical value", "adj_pvalue", "decision")
+    rownames(res) <- names(hyp_mat)
 
     quant <- crit_values2(erg, alpha = alpha)
 
@@ -467,16 +539,50 @@ RMST.permutation.test <- function(time = NULL, status = NULL, group = NULL,
   group <- factor(group, labels = 1:k)
   # some possible values for hyp_mat
   if(is.character(hyp_mat)){
-    Y <- GFDmcv::contr_mat(k, type = hyp_mat)
-    X <- data.frame(t(Y))
-    colnames(X) <- rownames(Y)
-    hyp_mat <- as.list(X)
-    hyp_mat <- lapply(hyp_mat, t)
-  }else{
-    if(is.null(hyp_vec)){
+    if(hyp_mat %in% c("center", "Dunnett", "Tukey")){
+      Y <- GFDmcv::contr_mat(k, type = hyp_mat)
+      X <- data.frame(t(Y))
+      colnames(X) <- rownames(Y)
+      hyp_mat <- as.list(X)
+      hyp_mat <- lapply(hyp_mat, t)
+    }else{
+      if(hyp_mat== "crossed factorial"){
+        if(is.null(formula)) stop("Formula needed to realize the crossed factorial design.")
+        formula2 <- paste0(formula, "*", event)
+        dat <- model.frame(formula2, data)
+        nadat <- names(dat)
+        nf <- ncol(dat) - 2
+        fl <- NA
+        for (aa in 1:nf) {
+          fl[aa] <- nlevels(as.factor(dat[, aa + 1]))
+        }
+        levels <- list()
+        for (jj in 1:nf) {
+          levels[[jj]] <- levels(as.factor(dat[, jj + 1]))
+        }
+        lev_names <- expand.grid(levels)
+        if (nf == 1) {
+          hyp_mat <- list(diag(fl) - matrix(1/fl, ncol = fl,
+                                            nrow = fl))
+        }else {
+          lev_names <- lev_names[do.call(order, lev_names[, 1:nf]),]
+          formula3 <- as.formula(formula)
+          nr_hypo <- attr(terms(formula3), "factors")
+          fac_names_original <- colnames(nr_hypo)
+          formula1 <- as.formula( gsub("\\+", "*", formula))
+          nr_hypo <- attr(terms(formula1), "factors")
+          fac_names <- colnames(nr_hypo)
+          perm_names <- t(attr(terms(formula1), "factors")[-1, ])
+
+          hyp_mat <- HC(fl, perm_names, fac_names)[[1]]
+          names(hyp_mat) <- HC(fl, perm_names, fac_names)[[2]]
+          hyp_mat <- hyp_mat[fac_names_original]
+
+        }
+      }else{ stop("hyp_mat is an invalid character input") }
+    }}else{if(is.null(hyp_vec)){
       warning("hyp_vec is chosen as zero vector since it is unspecified!")
-    }
-  }
+    }}
   if(is.null(hyp_vec)){
     hyp_vec <- lapply(hyp_mat, function(x) rep(0, nrow(x)))
     #warning("hyp_vec is chosen as zero vector since it is unspecified!")
@@ -571,6 +677,7 @@ RMST.permutation.test <- function(time = NULL, status = NULL, group = NULL,
     res <- matrix(list() , nrow = L, ncol = 8)
     colnames(res) <- c("hyp_matrix", "estimator", "lwr_conf", "upr_conf",
                        "test_stat", "critical value", "adj_pvalue", "decision")
+    rownames(res) <- names(hyp_mat)
 
     quant <- numeric(L)
     for(l in 1:L){
@@ -605,6 +712,7 @@ RMST.permutation.test <- function(time = NULL, status = NULL, group = NULL,
   }else{
     res <- matrix(list() , nrow = L, ncol = 6)
     colnames(res) <- c("hyp_matrix", "estimator", "test_stat", "critical value", "adj_pvalue", "decision")
+    rownames(res) <- names(hyp_mat)
 
     quant <- numeric(L)
     for(l in 1:L){
